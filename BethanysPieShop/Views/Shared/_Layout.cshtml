@@ -42,6 +42,7 @@
                     </li>
                     @await Component.InvokeAsync("ShoppingCartSummary")
                 </ul>
+                @await  Html.PartialAsync("LoginPartial")
             </div>
         </div>
     </nav>
@@ -59,5 +60,7 @@
             </div>
         </div>
     </div>
+
+    @RenderSection("scripts", required: false)
 </body>
 </html>
