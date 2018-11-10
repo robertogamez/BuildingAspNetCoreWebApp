@@ -78,7 +78,8 @@ namespace BethanysPieShop.Controllers
             {
                 var user = new IdentityUser
                 {
-                    UserName = loginViewModel.UserName
+                    UserName = loginViewModel.UserName,
+                    Email = loginViewModel.UserName
                 };
                 var result = await _userManager.CreateAsync(user, loginViewModel.Password);
 
