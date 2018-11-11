@@ -10,14 +10,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BethanysPieShop.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Administrators")]
     public class AdminController : Controller
     {
-        private UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AdminController(UserManager<ApplicationUser> userManager)
+        public AdminController(
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager
+        )
         {
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         public IActionResult Index()
@@ -139,5 +144,69 @@ namespace BethanysPieShop.Controllers
 
             return RedirectToAction("UserManagement", _userManager.Users);
         }
+
+        // Role management
+        public IActionResult RoleManagement()
+        {
+            var roles = _roleManager.Roles;
+
+            return View(roles);
+        }
+
+        public IActionResult AddNewRole() => View();
+
+        [HttpPost]
+        public async Task<IActionResult> AddNewRole(AddRoleViewModel addRoleViewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(addRoleViewModel);
+            }
+
+            var role = new IdentityRole
+            {
+                Name = addRoleViewModel.RoleName
+            };
+
+            IdentityResult result = await _roleManager.CreateAsync(role);
+
+            if (result.Succeeded)
+            {
+                return RedirectToAction("RoleManagement", _roleManager.Roles);
+            }
+
+            foreach (IdentityError error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return View(addRoleViewModel);
+        }
+
+        public async Task<IActionResult> EditRole(string id)
+        {
+            var role = await _roleManager.FindByIdAsync(id);
+
+            if (role == null)
+                return RedirectToAction("RoleManagement", _roleManager.Roles);
+
+            var editRoleViewModel = new EditRoleViewModel
+            {
+                Id = role.Id,
+                RoleName = role.Name,
+                Users = new List<string>()
+            };
+
+
+            foreach (var user in _userManager.Users)
+            {
+                if (await _userManager.IsInRoleAsync(user, role.Name))
+                    editRoleViewModel.Users.Add(user.UserName);
+            }
+
+            return View(editRoleViewModel);
+        }
+
+
     }
 }
