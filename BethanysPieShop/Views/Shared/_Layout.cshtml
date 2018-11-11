@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization
+
+@inject SignInManager<ApplicationUser> SignInManager
+
+<!DOCTYPE html>
 
 <html>
 <head>
@@ -41,8 +46,17 @@
                         </a>
                     </li>
                     @await Component.InvokeAsync("ShoppingCartSummary")
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        @await Component.InvokeAsync("AdminMenu")
+
+                        <li class="dropdown">
+                            <a asp-controller="PieManagement"
+                               asp-action="Index">Pie Management</a>
+                        </li>
+                    }
                 </ul>
-                @await  Html.PartialAsync("LoginPartial")
+                @await Html.PartialAsync("LoginPartial")
             </div>
         </div>
     </nav>

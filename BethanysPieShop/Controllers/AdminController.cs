@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BethanysPieShop.Auth;
 using BethanysPieShop.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -12,9 +13,9 @@ namespace BethanysPieShop.Controllers
     [Authorize]
     public class AdminController : Controller
     {
-        private UserManager<IdentityUser> _userManager;
+        private UserManager<ApplicationUser> _userManager;
 
-        public AdminController(UserManager<IdentityUser> userManager)
+        public AdminController(UserManager<ApplicationUser> userManager)
         {
             _userManager = userManager;
         }
@@ -44,10 +45,13 @@ namespace BethanysPieShop.Controllers
                 return View(addUserViewModel);
             }
 
-            var user = new IdentityUser
+            var user = new ApplicationUser
             {
                 UserName = addUserViewModel.UserName,
-                Email = addUserViewModel.Email
+                Email = addUserViewModel.Email,
+                BirthDate = addUserViewModel.Birthdate,
+                City = addUserViewModel.City,
+                Country = addUserViewModel.Country
             };
 
             IdentityResult result = await _userManager.CreateAsync(user, addUserViewModel.Password);
@@ -74,18 +78,30 @@ namespace BethanysPieShop.Controllers
                 return RedirectToAction("UserManagement", _userManager.Users);
             }
 
-            return View(user);
+            var vm = new EditUserViewModel() {
+                Id = user.Id,
+                Email = user.Email,
+                UserName = user.UserName,
+                Birthdate = user.BirthDate,
+                City = user.City,
+                Country = user.Country
+            };
+
+            return View(vm);
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditUser(string id, string UserName, string Email)
+        public async Task<IActionResult> EditUser(EditUserViewModel editUserViewModel)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.FindByIdAsync(editUserViewModel.Id);
 
             if (user != null)
             {
-                user.Email = Email;
-                user.UserName = UserName;
+                user.Email = editUserViewModel.Email;
+                user.UserName = editUserViewModel.UserName;
+                user.BirthDate = editUserViewModel.Birthdate;
+                user.City = editUserViewModel.City;
+                user.Country = editUserViewModel.Country;
 
                 var result = await _userManager.UpdateAsync(user);
 
@@ -105,7 +121,7 @@ namespace BethanysPieShop.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteUser(string userId)
         {
-            IdentityUser user = await _userManager.FindByIdAsync(userId);
+            ApplicationUser user = await _userManager.FindByIdAsync(userId);
 
             if (user != null)
             {

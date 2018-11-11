@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BethanysPieShop.Auth;
 using BethanysPieShop.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -12,12 +13,12 @@ namespace BethanysPieShop.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
         public AccountController(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager
         )
         {
             _signInManager = signInManager;
@@ -76,7 +77,7 @@ namespace BethanysPieShop.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new IdentityUser
+                var user = new ApplicationUser
                 {
                     UserName = loginViewModel.UserName,
                     Email = loginViewModel.UserName
